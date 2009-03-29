@@ -3,32 +3,33 @@
 Twitter fingerer.
 """
 
+import sys
+
+sys.path.insert(0, 'twitty-twister/lib')
+
 from twisted.internet import protocol, reactor, defer, utils
-from twisted.protocols import basic
+from twisted.protocols import finger
+from twisted.python import log
 from twisted.web import client
 
-class FingerProtocol(basic.LineReceiver):
+import twitter
+
+class FingerProtocol(finger.Finger):
     """Finger protocol handler."""
 
-    def getUser(self, u):
-        d = defer.Deferred()
-        reactor.callWhenRunning(d.callback, "hi")
-        return d
+    def getUser(self, slash_w, user):
+        d = twitter.Twitter().show_user(user)
+        d.addCallback(self._formatResponse)
+        d.addErrback(log.err)
+        d.addErrback(lambda e: self._refuseMessage(str(e)))
 
     def _formatResponse(self, res):
-        self.transport.write(repr(res))
-        self.transport.loseConnection()
+        s = """Login: %(login)s         			Name: %(name)s
 
-    def lineReceived(self, user):
-        """What to do when a line comes in."""
-        d=self.getUser(user)
-        d.addErrback(lambda x: self.transport.write("Error:  %s\n" % repr(x)))
-        d.addCallback(self._formatResponse)
+%(status)s
+""" % {'login': res.screen_name, 'name': res.name, 'status': res.status.text}
+        self._refuseMessage(s.encode('utf-8'))
 
 class FingerFactory(protocol.ServerFactory):
     """Factory for building finger instances"""
     protocol = FingerProtocol
-
-if __name__ == '__main__':
-    reactor.listenTCP(1079, FingerFactory())
-    reactor.run()

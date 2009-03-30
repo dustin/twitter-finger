@@ -12,8 +12,8 @@ any given point in time.
 
 ## Getting Ready:
 
-    git clone git://github.com/dustin/finger-twitter.git
-    cd finger-twitter
+    git clone git://github.com/dustin/twitter-finger.git
+    cd twitter-finger
     git submodule init
     git submodule update
 

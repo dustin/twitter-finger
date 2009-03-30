@@ -7,3 +7,19 @@ around.
 I did this in twisted because it was way easy and figured there was a
 need for a thousand or so concurrent finger requests to be handled at
 any given point in time.
+
+# Usage
+
+## Getting Ready:
+
+    git clone git://github.com/dustin/finger-twitter.git
+    cd finger-twitter
+    git submodule init
+    git submodule update
+
+## Running
+
+Any sort of variant that makes sense for your deployment with twistd.
+A quick interactive example:
+
+    twistd -ny finger.tac

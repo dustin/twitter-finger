@@ -15,6 +15,9 @@ from twisted.web import client
 
 import twitter
 
+SERVICES = {'twitter': 'http://twitter.com/', 'identi.ca': 'http://identi.ca/api'}
+DEFAULT_DOMAIN = 'twitter'
+
 class FingerProtocol(finger.Finger):
     """Finger protocol handler."""
 
@@ -43,6 +46,15 @@ class FingerProtocol(finger.Finger):
         d.addCallback(self._formatResponse)
         d.addErrback(log.err)
         d.addErrback(lambda e: self._refuseMessage(str(e)))
+
+    def getUser(self, slash_w, user):
+        self.forwardQuery(slash_w, user, DEFAULT_DOMAIN)
+
+    def getDomain(self, slash_w):
+        rv = ["The following services are supported:"]
+
+        rv.append('\n'.join([" - " + s for s in SERVICES.keys()]))
+        self._refuseMessage("\n".join(rv))
 
     def _formatResponse(self, res):
         s = """Login: %(login)s         			Name: %(name)s
